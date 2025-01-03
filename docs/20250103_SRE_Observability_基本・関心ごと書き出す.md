@@ -20,18 +20,6 @@
     - 一般的には３種類の機能で構成される。リクエストフローの追跡、スパンの記録、依存関係の可視化。
 - そもそもテレメトリデータとは?(OpenTelemetryの Telemetry)
     - 一般的には３種類。メトリクス（Metrics）＝定量的な数値データ、ログ（Logs）＝イベントの記録、トレース（Traces）＝分散システム内のリクエストフローの記録
-- そういえばDatadogのメトリクスタイプ
-  - Datadog https://docs.datadoghq.com/ja/metrics/types/?tab=rate#metric-types
-    - COUNT: ある時間間隔内のイベント発生の合計数
-        リクエスト数、エラー数、データベース接続数など
-    - RATE: ある時間間隔の 1 秒あたりのイベント発生の合計数
-        秒間リクエスト数、
-    - GAUGE: ある時間間隔のイベントのスナップショットを表します。この代表的なスナップショット値は、時間間隔中に Agent に送信された最後の値. GAUGE を使用して、使用可能なディスク容量や使用中のメモリなど、継続的にレポートする何かの測定を行うことができます
-        使用可能なディスク容量や使用中のメモリなど
-    - DISTRIBUTION: ある時間間隔内に計算された一連の値のグローバルな統計分布を表します。DISTRIBUTION は、基底のホストから独立してサービスなどの論理オブジェクトをインスツルメントするために使用できます
-        分布。データセット。離散か連続かは気にしていない。
-        DISTRIBUTIONタイプメトリクスのの平均, 最大, 最小を計算した結果はGAUGE, percentile aggregations (p50, p75, p90, p95, p99) もGAUGE, 分布の合計はCOUNT。
-        平均・最大・最小・９５パーセンタイル
 - 分散トレーシングのユースケースは？分散トレーシング,テレメトリデータ収集はサービスレベル改善にどう関係する？
     - パフォーマンス、遅延やエラーが発生している個所の特定、処理時間やメタデータを記録（例: HTTPリクエストの詳細、データベースクエリの遅延）することで、サービスの改善に繋げる
 - 分散トレーシング（Distributed Tracing） と Observability（可観測性） の関係は？
@@ -76,16 +64,19 @@
             スパン属性
                 各操作やリクエストの詳細情報（例: HTTPリクエスト、エラーコード）を設定
     - 費用対効果（コスト観点）とデータ活用の観点から収集するテレメトリデータ（ログ、メトリクス、スパン）選択
-- AWS上でのシステム構成について検討
-  - 例えば、AWS ECSのタスク内にAWS X-Rayデーモンのコンテナを起動しておけば、アプリケーションからOpenTelemetryのライブラリ経由でトレースデータをAWS X-Rayに送信できる(X-Rayの機能での分析が可能になる)
-    - AWS X-RayのSegment構造定義 https://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
-        - 必須のセグメントフィールド
-  - AWS X-Rayデーモンを使う場合でも、AWS X-Ray SDKを使わずに、OpenTelemetryを利用してトレースデータをAWS X-Rayに送信することが可能です。この方法を選ぶことで、柔軟性と拡張性を高めることができます。
-  - AWS X-Ray, Aurora, Lambda, EC2/ECS
-- Fluent Bitを使ったテレメトリ収集のユースケース
-  - 費用対効果（コスト観点）とデータ活用の観点から収集するテレメトリデータをログに限定した場合の一般的な手段の１つ
-  - 豊富なプラグインや最新版で提供されているWASM拡張を利用して、複数の出力先を想定した柔軟なカスタマイズも可能
-  - 送信元アプリケーションから処理を切り離してテレメトリ収集の仕様を制御できる
+    - アプリケーションでspanデータ型の定義 と spanデータ送信処理を実装する
+      - データ型の要素属性(網羅性)、情報サイズ, 計算量(CPU, メモリ)
+      - spanデータ送信SDKの呼び出し、送信成功・失敗の判定、送信失敗時の制御（リトライ・２次保存）
+      - 部品種類, ファイル・関数・型の命名、コメント
+      - 計測対象とする区間
+        - 全てのAPI, 特定のAPIのみ選択, 特性のAPIのみ除外
+        - APIの開始ー終了, API処理内の部分処理
+    - AWS上でのシステム構成について検討
+      - 例えば、AWS ECSのタスク内にAWS X-Rayデーモンのコンテナを起動しておけば、アプリケーションからOpenTelemetryのライブラリ経由でトレースデータをAWS X-Rayに送信できる(X-Rayの機能での分析が可能になる)
+        - AWS X-RayのSegment構造定義 https://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
+            - 必須のセグメントフィールド
+      - AWS X-Rayデーモンを使う場合でも、AWS X-Ray SDKを使わずに、OpenTelemetryを利用してトレースデータをAWS X-Rayに送信することが可能です。この方法を選ぶことで、柔軟性と拡張性を高めることができます。
+      - AWS X-Ray, Aurora, Lambda, EC2/ECS
 - OpenTelemetryを使ったトレースの基本的な流れ / Go言語とgo-chiフレームワークでOpenTelemetryを使用した簡単な実装
   - ライブラリのインストール
     - go get go.opentelemetry.io/otel
@@ -95,10 +86,30 @@
     - go get go.opentelemetry.io/otel/exporters/jaeger
     - go get go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
     - go get github.com/go-chi/chi/v5
-- アプリケーションでspanデータ型の定義 と spanデータ送信処理を実装する
-  - データ型の要素属性(網羅性)、情報サイズ, 計算量(CPU, メモリ)
-  - spanデータ送信SDKの呼び出し、送信成功・失敗の判定、送信失敗時の制御（リトライ・２次保存）
-  - 部品種類, ファイル・関数・型の命名、コメント
-  - 計測対象とする区間
-    - 全てのAPI, 特定のAPIのみ選択, 特性のAPIのみ除外
-    - APIの開始ー終了, API処理内の部分処理
+
+- 今現在のアプローチ。DatadogとFluentbit
+  - Datadogメトリクスの運用モニタリング活用 https://docs.datadoghq.com/ja/metrics/types/?tab=rate#metric-types
+    - COUNT: ある時間間隔内のイベント発生の合計数
+        リクエスト数、エラー数、データベース接続数など
+    - RATE: ある時間間隔の 1 秒あたりのイベント発生の合計数
+        秒間リクエスト数、
+    - GAUGE: ある時間間隔のイベントのスナップショットを表します。この代表的なスナップショット値は、時間間隔中に Agent に送信された最後の値. GAUGE を使用して、使用可能なディスク容量や使用中のメモリなど、継続的にレポートする何かの測定を行うことができます
+        使用可能なディスク容量や使用中のメモリなど
+    - DISTRIBUTION: ある時間間隔内に計算された一連の値のグローバルな統計分布を表します。DISTRIBUTION は、基底のホストから独立してサービスなどの論理オブジェクトをインスツルメントするために使用できます
+        分布。データセット。離散か連続かは気にしていない。
+        DISTRIBUTIONタイプメトリクスのの平均, 最大, 最小を計算した結果はGAUGE, percentile aggregations (p50, p75, p90, p95, p99) もGAUGE, 分布の合計はCOUNT。
+        平均・最大・最小・９５パーセンタイル
+  - Fluent Bitを使ったログ収集
+    - Fluent Bitを使ったテレメトリ収集のユースケース
+      - 費用対効果（コスト観点）とデータ活用の観点から収集するテレメトリデータをログに限定した場合の一般的な手段の１つ
+      - 豊富なプラグインや最新版で提供されているWASM拡張を利用して、複数の出力先を想定した柔軟なカスタマイズも可能
+      - 送信元アプリケーションから処理を切り離してテレメトリ収集の仕様を制御できる
+    - アプリケーションログの収集と解析
+      - 収集対象: アプリケーションが生成するログファイルや標準出力
+      - 出力先: Elasticsearch, Grafana Lokiなどの分析ツール。
+    - 分散トレーシングの補完
+      - Fluent Bitを使ってトレースログを収集し、OpenTelemetryやAWS X-Rayに統合。
+    - メトリクスデータの収集
+      - Prometheus Exporterを使い、システムやアプリケーションのパフォーマンスメトリクスを収集。
+    - クラウド監視ツールとの連携
+      - Fluent Bitを使ってAWS CloudWatch、Google Cloud Logging、Azure Monitorなどにデータを送信。
