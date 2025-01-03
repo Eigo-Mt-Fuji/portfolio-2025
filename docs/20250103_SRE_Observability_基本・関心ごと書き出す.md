@@ -753,5 +753,79 @@ func otelMiddleware(next http.Handler) http.Handler {
   - 計測対象とする区間
     - 全てのAPI, 特定のAPIのみ選択, 特性のAPIのみ除外
     - APIの開始ー終了, API処理内の部分処理
+
+
+
+- サブセグメントに詳細を追跡するための情報を付与することができる
+  - 完了したリクエストに対してサブセグメントを個別に送信することもできます
+  - ダウンストリームサービス（下流のサービス）呼び出しの追跡に使える
+    - 下流のサービスからX-Rayにトレースデータを送信する際にparent_id属性に上流のサービスのidを設定して送信するお作法(送信されない場合、親の方のサブセグメントが壊れているとみなされる＝制御)
+- 単一のセグメントを送信するか、もしくは、進行中セグメントと完了セグメントに分けてX-Rayに送信する（完了セグメントは進行中のセグメントを上書きする）
+  - 進行中セグメントと完了セグメントに分けてX-Rayに送信する（完了セグメントは進行中のセグメントを上書きする）
+    - とりあえず200応答を返してから、バックグラウンド処理実行するパターン（ジョブキューイングと非同期処理）
+        - 200応答を返すとき
+          - 応答が送信されたらすぐに、完全なセグメントを X-Ray に送信
+        - 非同期処理が完了した時
+          - 完了する作業のサブセグメントを送信できます
+    - あえて進行中セグメントを記録することのメリットはあるか?    
+      - 非同期処理ではなくとも、1回の実行に時間のかかるAPIリクエストや全体の処理時間が長いバッチのようなワークロードで、進行中のセグメントを記録することも可能?
+- X-Rayが独自にサポートする特別なコンテキスト「HTTP 呼び出し」「AWSへのリクエスト」「SQL」で多くのケースに対応
+
+コスト削減（不要データの排除、長期保存の最適化）
+・まずログデータをCloudWatch Logsに収集する。ログの保存期間を短くし、長期のログ保存用の適切なストレージに移動する
+・ログデータをCloudWatch Logs以外のストレージに収集する
+
+EOL対応でのバージョンアップ、コスト削減、パフォーマンス計測、検証
+
+Fluent Bitは、AWS X-Rayを次のように補完します
+複数の分析ツールへのデータ送信による柔軟性の向上
+
+・aws-xray-sdk-go/xray
+    アプリケーション内のトレースデータを生成・送信
+・aws-sdk-go/service/xray
+    AWS X-RayサービスAPIを操作するためのライブラリ
+    既存のデータ取得やカスタムトレース送信に使用
+
+機能的な補完:
+    分散トレーシング、ピンポイントだから,ログデータの収集、フィルタリング、前処理。
+    カスタムテレメトリデータの収集と統合。マルチクラウドやオンプレミス環境との接続。
+非機能的な補完:
+    パフォーマンスの向上（データの効率的な前処理）
+
+xray.PutTraceSegmentsInput
+    TraceSegmentDocuments []string
+        A string 
+        containing a JSON document 
+        defining one or more segments or subsegments.
+
+・直近１ヶ月のログ、最大24時間分を問い合わせ可能（開始・終了時刻指定必須。問い合わせ現在時刻から15分以上未来のデータを問い合わせることは不可。過去１ヶ月以内のログに限る）
+
+eigofujikawa@EigoFujawanoMBP aws-xray-test % aws xray get-trace-summaries --region ap-northeast-1 --start-time 1703894400.0 --end-time 1703980799.0
+
+
+An error occurred (InvalidRequestException) when calling the GetTraceSummaries operation: Start time cannot be earlier than 30 days ago
+eigofujikawa@EigoFujawanoMBP aws-xray-test % aws xray get-trace-summaries --region ap-northeast-1 --start-time 1735430400 --end-time 1703980799.0
+
+
+An error occurred (InvalidRequestException) when calling the GetTraceSummaries operation: End time cannot be earlier than start time
+eigofujikawa@EigoFujawanoMBP aws-xray-test % aws xray get-trace-summaries --region ap-northeast-1 --start-time 1735430400 --end-time 1735603200  
+
+An error occurred (InvalidRequestException) when calling the GetTraceSummaries operation: Time range cannot be longer than 24 hours
+eigofujikawa@EigoFujawanoMBP aws-xray-test % aws xray get-trace-summaries --region ap-northeast-1 --start-time 1735516800 --end-time 1735603200
+{
+    "TraceSummaries": [],
+    "TracesProcessedCount": 0,
+    "ApproximateTime": "2024-12-31T09:00:00+09:00"
+}
+eigofujikawa@EigoFujawanoMBP aws-xray-test % aws xray get-trace-summaries --region ap-northeast-1 --start-time 1735560000 --end-time 1735646400
+
+An error occurred (InvalidRequestException) when calling the GetTraceSummaries operation: End time cannot be later than 15 minutes in the future
+eigofujikawa@EigoFujawanoMBP aws-xray-test % aws xray get-trace-summaries --region ap-northeast-1 --start-time 1735560000 --end-time 1735632000
+{
+    "TraceSummaries": [],
+    "TracesProcessedCount": 0,
+    "ApproximateTime": "2024-12-31T17:00:00+09:00"
+}
 ```
+
 
