@@ -20,6 +20,18 @@
     - 一般的には３種類の機能で構成される。リクエストフローの追跡、スパンの記録、依存関係の可視化。
 - そもそもテレメトリデータとは?(OpenTelemetryの Telemetry)
     - 一般的には３種類。メトリクス（Metrics）＝定量的な数値データ、ログ（Logs）＝イベントの記録、トレース（Traces）＝分散システム内のリクエストフローの記録
+- そういえばDatadogのメトリクスタイプ
+  - Datadog https://docs.datadoghq.com/ja/metrics/types/?tab=rate#metric-types
+    - COUNT: ある時間間隔内のイベント発生の合計数
+        リクエスト数、エラー数、データベース接続数など
+    - RATE: ある時間間隔の 1 秒あたりのイベント発生の合計数
+        秒間リクエスト数、
+    - GAUGE: ある時間間隔のイベントのスナップショットを表します。この代表的なスナップショット値は、時間間隔中に Agent に送信された最後の値. GAUGE を使用して、使用可能なディスク容量や使用中のメモリなど、継続的にレポートする何かの測定を行うことができます
+        使用可能なディスク容量や使用中のメモリなど
+    - DISTRIBUTION: ある時間間隔内に計算された一連の値のグローバルな統計分布を表します。DISTRIBUTION は、基底のホストから独立してサービスなどの論理オブジェクトをインスツルメントするために使用できます
+        分布。データセット。離散か連続かは気にしていない。
+        DISTRIBUTIONタイプメトリクスのの平均, 最大, 最小を計算した結果はGAUGE, percentile aggregations (p50, p75, p90, p95, p99) もGAUGE, 分布の合計はCOUNT。
+        平均・最大・最小・９５パーセンタイル
 - 分散トレーシングのユースケースは？分散トレーシング,テレメトリデータ収集はサービスレベル改善にどう関係する？
     - パフォーマンス、遅延やエラーが発生している個所の特定、処理時間やメタデータを記録（例: HTTPリクエストの詳細、データベースクエリの遅延）することで、サービスの改善に繋げる
 - 分散トレーシング（Distributed Tracing） と Observability（可観測性） の関係は？
@@ -33,8 +45,16 @@
     - Datadog, New Relic
       - Datadogは今まさに仕事で使っている。そういえば、2018年時点でもNewRelic使っていたな。
 - マネージドサービス以外も含めて、分散トレーシングのためのテレメトリデータ収集システム（バックエンド・ストレージ）を実現するための具体的な選択肢
-    - Jaeger, SigNoz, OpenTelemetry Collector, Prometheus, Uptrace, Zipkin
     - Datadog, NewRelic, AWS X-Ray, GCP Cloud Trace, Azure Application Insights
+    - Jaeger, SigNoz, Prometheus, Uptrace, Zipkin
+      - 特に気になるのは、JaegerとSigNoz
+        - Jaeger: https://www.jaegertracing.io/
+          - Distributed tracing observability platforms, such as Jaeger, are essential for modern software applications that are architected as microservices. Jaeger maps the flow of requests and data as they traverse a distributed system. These requests may make calls to multiple services, which may introduce their own delays or errors. Jaeger connects the dots between these disparate components, helping to identify performance bottlenecks, troubleshoot errors, and improve overall application reliability.
+          - マイクロサービス(相互接続されたソフトウェアコンポーネント)の問題をモニタリングおよびトラブルシューティングするために使用できるソフトウェア
+        - SigNoz: オープンソースのDatadog/New Relic代替と言われている。APM。ログ基盤、外形監視としても使える。ClickHouseというオープンソースのカラム型データベース管理システムに基づいている。ホスティング型のSaaSモデルとエンタープライズ向けのオンプレミス展開を提供
+        - Prometheus: Prometheus, a Cloud Native Computing Foundation project, is a systems and service monitoring system. It collects metrics from configured targets at given intervals, evaluates rule expressions, displays the results, and can trigger alerts when specified conditions are observed. https://github.com/prometheus/prometheus
+          - While Jaeger is an end-to-end distributed tracing tool, Prometheus is used as a time-series database for monitoring metrics
+        - Grafana: データ可視化ツール「Grafana」可視化プラットフォームとして大きな広がりを見せつつある。リアルタイムのデータを統合し、実用的な成果を実現。あなたに合ったオブザーバビリティ。
 - テレメトリデータ収集システムの構築と運用を設計するためのメッセージングシステムとデータベースシステム
   - メッセージングシステムとデータベースシステムに関する一定の理解と特徴に基づいた選択、設計、オペレーションが必要
     - メッセージ伝送に適したシステムとはどのような役割をもち、何の機能を持たないことを選択しているか
