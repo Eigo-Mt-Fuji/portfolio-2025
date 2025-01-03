@@ -1,4 +1,4 @@
-# SRE x Observability 基本・関心ごと書き出す
+# SRE x Observability 基本・関心・現状の書き出し
 
 ## 時間
 - 1/1 - 1/3(
