@@ -11,6 +11,7 @@
             - CloudWatchが、過去のデータに機械学習アルゴリズムを適用して、メトリクスの想定値のモデルを作成。最大 2 週間分のメトリクスデータをトレーニングする。
             - CloudWatch の異常検出はモデルを継続的に評価し、調整する（デプロイまたは他の異常なイベントが使用されないようにしたり、特定の期間を除外したり、季節的、スパイク、スパースなメトリクスのモデルを改善する）
         - 遅延や障害の原因の特定・推定（難易度が高くノウハウ共有や連携が難しい業務を生成 AI を使って支援する）
+        - 去年学んだエンジニアリングへの生成AI活用プラクティス https://docs.google.com/spreadsheets/d/1RGwIqkopaNy7DPLZ85MrhCCkH21jjSwrYSv60IWMqC8/edit?hl=ja&gid=0#gid=0
     - OpenTelemetryと分散TracingとObservability - https://aws.amazon.com/jp/blogs/news/awsobservabilityfes2024autumn/
         - AWS での負荷試験における分析の速度と品質を向上させるための Observability アセット
             - CloudWatch Container Insights
