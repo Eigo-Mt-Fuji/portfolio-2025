@@ -15,7 +15,6 @@
 - C4 Diagram 🦺⚠️ https://mermaid.js.org/syntax/c4.html
 - Mindmaps https://mermaid.js.org/syntax/mindmap.html
 - Timeline https://mermaid.js.org/syntax/timeline.html
-- ZenUML https://mermaid.js.org/syntax/zenUML.html
 - Sankey 🔥 https://mermaid.js.org/syntax/sankey.html
 - XY Chart 🔥 https://mermaid.js.org/syntax/xyChart.html
 - Block Diagram 🔥 https://mermaid.js.org/syntax/blockDiagram.html
@@ -300,19 +299,6 @@ timeline
 ```
 - **Components:**
   - Events: `A: task 1`.
-
-### 14. ZenUML
-- **Example:**
-```mermaid
-zenuml
-    title Demo
-    Alice->John: Hello John, how are you?
-    John->Alice: Great!
-    Alice->John: See you later!
-```
-
-- **Components:**
-  - Actions: `Alice -> Bob`.
 
 ### 15. Sankey
 - **Example:**
