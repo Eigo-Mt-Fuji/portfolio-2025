@@ -17,7 +17,7 @@
 - Timeline https://mermaid.js.org/syntax/timeline.html
 - Sankey 🔥 https://mermaid.js.org/syntax/sankey.html
 - XY Chart 🔥 https://mermaid.js.org/syntax/xyChart.html
-- Block Diagram 🔥 https://mermaid.js.org/syntax/blockDiagram.html
+- Block https://mermaid.js.org/syntax/block.html
 - Packet 🔥 https://mermaid.js.org/syntax/packet.html
 - Kanban 🔥 https://mermaid.js.org/syntax/kanban.html
 - Architecture 🔥 https://mermaid.js.org/syntax/architecture.html
@@ -399,11 +399,24 @@ xychart-beta
 
 ### 17. Block Diagram
 - **Example:**
+
 ```mermaid
-blockDiagram
-    block main {
-    }
+block-beta
+columns 1
+  db(("DB"))
+  blockArrowId6<["&nbsp;&nbsp;&nbsp;"]>(down)
+  block:ID
+    A
+    B["A wide one in the middle"]
+    C
+  end
+  space
+  D
+  ID --> D
+  C --> D
+  style B fill:#969,stroke:#333,stroke-width:4px
 ```
+
 - **Components:**
   - Blocks: Defined regions.
 
