@@ -384,10 +384,16 @@ Wind,Electricity grid,289.366
 
 ### 16. XY Chart
 - **Example:**
+
 ```mermaid
-xyChart
-    x: 1, y: 2
+xychart-beta
+    title "Sales Revenue"
+    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
+    y-axis "Revenue (in $)" 4000 --> 11000
+    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
+    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
 ```
+
 - **Components:**
   - Points: `x`, `y` values.
 
