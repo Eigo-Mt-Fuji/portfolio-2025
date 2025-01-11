@@ -24,6 +24,92 @@
 
 ## Sample
 
+### 20. Architecture
+- **Example:**
+```mermaid
+architecture-beta
+    group api(logos:aws-lambda)[API]
+
+    service db(logos:aws-aurora)[Database] in api
+    service disk1(logos:aws-glacier)[Storage] in api
+    service disk2(logos:aws-s3)[Storage] in api
+    service server(logos:aws-ec2)[Server] in api
+
+    db:L -- R:server
+    disk1:T -- B:server
+    disk2:T -- B:db
+```
+- **Components:**
+  - Systems: Logical units.
+
+### 1. Sequence Diagram
+
+- **Example:**
+
+```mermaid
+sequenceDiagram
+    participant Alice
+    participant Bob
+    Alice->>Bob: Hello Bob, how are you?
+    Bob-->>Alice: I am fine, thank you!
+```
+
+- **Components:**
+  - `participant`: Define entities (e.g., Alice, Bob).
+  - `->>`: Denotes messages.
+  - `-->>`: Denotes responses.
+
+### 4. Entity Relationship Diagram
+
+- **Example:**
+
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ ITEM : contains
+    CUSTOMER {
+        string name
+    }
+```
+- **Components:**
+  - Entities: `CUSTOMER`, `ORDER`, `ITEM`.
+  - Relationships: `||--o{` (one-to-many).
+
+### 6. Gantt
+
+- **Example:**
+
+```mermaid
+gantt
+    title Project Plan
+    section Section
+      Task 1: 2023-01-01, 1d
+```
+
+- **Components:**
+  - `section`: Logical grouping.
+  - Tasks: Defined with duration.
+
+### 2. Class Diagram
+
+- **Example:**
+```mermaid
+classDiagram
+    class Animal {
+        +String name
+        +void eat()
+    }
+    class Dog {
+        +String breed
+    }
+    Animal <|-- Dog
+```
+- **Components:**
+  - `class`: Defines a class.
+  - Attributes and methods: Listed inside the class.
+  - Relationships: `<|--` denotes inheritance.
+
+
 ### 0. Flowchart
 
 - flowchartの例
@@ -70,40 +156,6 @@ flowchart RL
   - click: ノードに外部リンクを設定できる。例えば、click B href "https://www.github.com" "Yes"は、Bというノードに外部リンクを設定する。
   - comment: フローチャート内にコメントを記載できる。「%%」から始まる行がコメントです。コメントはmermaidでレンダリング後は表示されませんが、mermaidのコードの可読性やメンテナンス性を高める効果がある。コメントの具体例は、%% this is a comment A -- text --> B{node}です
 
-### 1. Sequence Diagram
-
-- **Example:**
-
-```mermaid
-sequenceDiagram
-    participant Alice
-    participant Bob
-    Alice->>Bob: Hello Bob, how are you?
-    Bob-->>Alice: I am fine, thank you!
-```
-- **Components:**
-  - `participant`: Define entities (e.g., Alice, Bob).
-  - `->>`: Denotes messages.
-  - `-->>`: Denotes responses.
-
-### 2. Class Diagram
-- **Example:**
-```mermaid
-classDiagram
-    class Animal {
-        +String name
-        +void eat()
-    }
-    class Dog {
-        +String breed
-    }
-    Animal <|-- Dog
-```
-- **Components:**
-  - `class`: Defines a class.
-  - Attributes and methods: Listed inside the class.
-  - Relationships: `<|--` denotes inheritance.
-
 ### 3. State Diagram
 - **Example:**
 ```mermaid
@@ -116,20 +168,6 @@ stateDiagram-v2
   - States: e.g., `Idle`, `Working`.
   - Transitions: `-->` denotes state transitions.
 
-### 4. Entity Relationship Diagram
-- **Example:**
-```mermaid
-erDiagram
-    CUSTOMER ||--o{ ORDER : places
-    ORDER ||--|{ ITEM : contains
-    CUSTOMER {
-        string name
-    }
-```
-- **Components:**
-  - Entities: `CUSTOMER`, `ORDER`, `ITEM`.
-  - Relationships: `||--o{` (one-to-many).
-
 ### 5. User Journey
 - **Example:**
 ```mermaid
@@ -141,18 +179,6 @@ journey
 - **Components:**
   - `title`: Title of the journey.
   - `section`: A phase or action.
-
-### 6. Gantt
-- **Example:**
-```mermaid
-gantt
-    title Project Plan
-    section Section
-      Task 1: 2023-01-01, 1d
-```
-- **Components:**
-  - `section`: Logical grouping.
-  - Tasks: Defined with duration.
 
 ### 7. Pie Chart
 - **Example:**
@@ -479,22 +505,4 @@ kanban
 
 - **Components:**
   - Sections: `To Do`, `In Progress`.
-
-### 20. Architecture
-- **Example:**
-```mermaid
-architecture-beta
-    group api(logos:aws-lambda)[API]
-
-    service db(logos:aws-aurora)[Database] in api
-    service disk1(logos:aws-glacier)[Storage] in api
-    service disk2(logos:aws-s3)[Storage] in api
-    service server(logos:aws-ec2)[Server] in api
-
-    db:L -- R:server
-    disk1:T -- B:server
-    disk2:T -- B:db
-```
-- **Components:**
-  - Systems: Logical units.
 
