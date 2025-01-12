@@ -1,0 +1,30 @@
+services:
+  app:
+    build: 
+      context: .
+    platform: linux/x86_64
+    tty: true
+    environment:
+      - TZ=Asia/Tokyo
+      - JAEGER_ENDPOINT=http://jaeger:4318/v1/traces
+    ports:
+      - 8080:8080
+    networks:
+      - jaeger
+  jaeger:
+    
+    image: jaegertracing/all-in-one:latest
+    platform: linux/x86_64
+    ports:
+      # https://www.jaegertracing.io/docs/2.2/apis/#read-apis
+      - "16686:16686"
+      # OTLP Protobuf or OTLP JSON https://www.jaegertracing.io/docs/2.2/apis/#write-apis
+      - "4318:4318"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - LOG_LEVEL=debug
+    networks:
+      - jaeger
+
+networks:
+  jaeger:
