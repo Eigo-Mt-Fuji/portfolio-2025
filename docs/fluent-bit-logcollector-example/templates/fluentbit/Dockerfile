@@ -1,3 +1,3 @@
-FROM public.ecr.aws/aws-observability/aws-for-fluent-bit:2.32.2
+FROM fluent/fluent-bit:3.2.4
 
-COPY ./fluent-bit.conf /fluent-bit/etc/fluent-bit.conf
+COPY ./fluent-bit.yaml /fluent-bit/etc/fluent-bit.yaml

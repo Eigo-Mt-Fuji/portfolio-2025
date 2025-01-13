@@ -4,7 +4,7 @@ resource "aws_launch_template" "fluentbit" {
   image_id               = var.fluentbit_ec2_ami
 
   iam_instance_profile {
-    name = aws_iam_role.ecs_instance_role.name
+    name = aws_iam_instance_profile.ecs_instance_role.name
   }
 
   tag_specifications {
@@ -14,7 +14,8 @@ resource "aws_launch_template" "fluentbit" {
         datadog  = "monitored"
     }
   }
-  instance_type = "t3.micro"
+  # TODO: choose instance type
+  instance_type = var.fluentbit_ec2_instance_type
   user_data = base64encode(templatefile("${path.module}/templates/autoscalinggroup/userdata.sh", { ecs_cluster = aws_ecs_cluster.fluentbit.name, stack_name  = "asg-fluentbit" }))
   credit_specification {
     cpu_credits = "unlimited"
@@ -31,24 +32,25 @@ resource "aws_launch_template" "fluentbit" {
   # Reserved for root volume	
   block_device_mappings {
     device_name = "/dev/xvda"
+    # TODO: use gp3
     ebs {
       volume_type = "gp2"
       volume_size = 30
       encrypted = false
-      # TODO: delete_on_termination = false
       delete_on_termination = true
     }
   }
+  # TODO: optimize
   ebs_optimized = false
 }
 
 resource "aws_cloudformation_stack" "fluentbit_asg" {
-  name          = "asg-fluentbit"
+  name          = "${var.env}-asg-logcollector"
   template_body = templatefile("${path.module}/templates/autoscalinggroup/config.yml", {
-    stack_name                              = "asg-fluentbit"
+    stack_name                              = "${var.env}-asg-logcollector"
     launchtemplate_name                     = aws_launch_template.fluentbit.name
     launchtemplate_varsion                  = aws_launch_template.fluentbit.latest_version
-    autoscalinggroup_name                   = "fluentbit"
+    autoscalinggroup_name                   = "${var.env}-logcollector-asg"
     target_group_arn = aws_lb_target_group.nlb_tg.arn
     max_batch_size                          = 1
     min_instances_in_service                = 1
@@ -61,11 +63,10 @@ resource "aws_cloudformation_stack" "fluentbit_asg" {
     desired_capacity                        = 1
     max_size                                = 1
     min_size                                = 1
-    instance_types                          = "t3.micro"
+    instance_types                          = var.fluentbit_ec2_instance_type
   })
 
   iam_role_arn  = aws_iam_role.cloudformation_service_role.arn
-
   depends_on = [
     aws_launch_template.fluentbit,
     aws_iam_role_policy_attachment.terminate_lifecyclehook,

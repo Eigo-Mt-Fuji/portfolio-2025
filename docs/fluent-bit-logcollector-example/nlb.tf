@@ -9,7 +9,6 @@ resource "aws_lb" "nlb" {
 }
 
 resource "aws_lb_listener" "nlb_listener" {
-  name = "${var.env}-logcollector-listener"
   load_balancer_arn = aws_lb.nlb.arn
   port              = 10224
   protocol          = "TCP"

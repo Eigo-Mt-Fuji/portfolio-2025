@@ -9,12 +9,12 @@ resource "aws_ecr_repository" "fluentbit" {
 }
 resource "null_resource" "default" {
   triggers = {
-    file_content_sha1 = sha1(join("", [for f in ["templates/fluentbit/build.sh", "templates/fluentbit/Dockerfile"]: filesha1(f)]))
+    file_content_sha1 = sha1(join("", [for f in ["templates/fluentbit/build.sh", "templates/fluentbit/Dockerfile", "templates/fluentbit/fluent-bit.yaml"]: filesha1(f)]))
   }
 
   provisioner "local-exec" {
     # docker build & push
-    command = "cd templates/fluentbit && sh ./build.sh"
+    command = "cd templates/fluentbit && sh ./build.sh ${var.env}"
   }
   depends_on = [aws_ecr_repository.fluentbit]
 }
