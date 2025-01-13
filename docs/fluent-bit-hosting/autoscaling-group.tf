@@ -16,7 +16,11 @@ resource "aws_launch_template" "fluentbit" {
   }
   # TODO: choose instance type
   instance_type = var.fluentbit_ec2_instance_type
-  user_data = base64encode(templatefile("${path.module}/templates/autoscalinggroup/userdata.sh", { ecs_cluster = aws_ecs_cluster.fluentbit.name, stack_name  = "asg-fluentbit" }))
+  user_data = base64encode(templatefile("${path.module}/templates/autoscalinggroup/userdata.sh", { 
+    ecs_cluster = aws_ecs_cluster.fluentbit.name, 
+    # workaround: Error: Cycle: aws_cloudformation_stack.fluentbit_asg, aws_launch_template.fluentbit
+    stack_name  = "${var.env}-asg-logcollector" 
+  }))
   credit_specification {
     cpu_credits = "unlimited"
   }
@@ -42,6 +46,10 @@ resource "aws_launch_template" "fluentbit" {
   }
   # TODO: optimize
   ebs_optimized = false
+
+  depends_on = [
+    aws_iam_instance_profile.ecs_instance_role
+  ]
 }
 
 resource "aws_cloudformation_stack" "fluentbit_asg" {
@@ -50,10 +58,10 @@ resource "aws_cloudformation_stack" "fluentbit_asg" {
     stack_name                              = "${var.env}-asg-logcollector"
     launchtemplate_name                     = aws_launch_template.fluentbit.name
     launchtemplate_varsion                  = aws_launch_template.fluentbit.latest_version
-    autoscalinggroup_name                   = "${var.env}-logcollector-asg"
+    autoscalinggroup_name                   = "${var.env}-logcollector-autoscalinggroup"
     target_group_arn = aws_lb_target_group.nlb_tg.arn
     max_batch_size                          = 1
-    min_instances_in_service                = 1
+    min_instances_in_service                = 0
     sns_role_arn = aws_iam_role.terminate_lifecyclehook.arn
     sns_target_arn = "arn:aws:sns:ap-northeast-1:047980477351:ecs_draining_instance-dev"
     availability_zone_1                     = "ap-northeast-1a"
@@ -68,6 +76,7 @@ resource "aws_cloudformation_stack" "fluentbit_asg" {
 
   iam_role_arn  = aws_iam_role.cloudformation_service_role.arn
   depends_on = [
+    aws_iam_role.cloudformation_service_role,
     aws_launch_template.fluentbit,
     aws_iam_role_policy_attachment.terminate_lifecyclehook,
     aws_iam_role_policy_attachment.attach_iam_pass,

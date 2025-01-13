@@ -6,33 +6,12 @@ resource "aws_ecs_task_definition" "fluentbit" {
   family                   = "${var.env}-logcollector-task"
   requires_compatibilities = ["EC2"]
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions    = jsonencode([
-    {
-      name      = "fluentbit"
-      # image     = "fluent/fluent-bit:3.1.3"
-      image = "${aws_ecr_repository.fluentbit.repository_url}:latest"
-      cpu       = 256
-      memory    = 512
-      essential = true
-      portMappings = [
-        {
-          containerPort = 10224
-        }
-      ]
-      environment = [
-        {
-          name  = "TARGET_S3_BUCKET"
-          value = var.target_s3_bucket
-        }
-      ]
-      mountPoints = [
-        {
-          sourceVolume  = "logs"
-          containerPath = "/fluent-bit/logs"
-        }
-      ]
-    }
-  ])
+  cpu       = 256
+  memory    = 512
+  container_definitions = templatefile("${path.module}/templates/ecs/task_definition.json", {
+    image = "${aws_ecr_repository.fluentbit.repository_url}:latest"
+    s3_bucket = var.target_s3_bucket
+  })
 
   volume {
     name = "logs"

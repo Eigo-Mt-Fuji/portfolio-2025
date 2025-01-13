@@ -17,8 +17,8 @@ variable "security_groups" {
 
 variable "fluentbit_ec2_ami" {
     # https://github.com/aws/amazon-ecs-ami/blob/main/CHANGELOG.md#20241217
-    # al2023-ami-2023.6.20241212.0-kernel-6.1-arm64 https://ap-northeast-1.console.aws.amazon.com/ec2/home?region=ap-northeast-1#ImageDetails:imageId=ami-018a608de9486664d
-    default = "ami-018a608de9486664d"
+    # al2023-ami-ecs-hvm-2023.0.20241217-kernel-6.1-arm64 https://ap-northeast-1.console.aws.amazon.com/ec2/home?region=ap-northeast-1#ImageDetails:imageId=ami-0f07b31ae158be656
+    default = "ami-0f07b31ae158be656"
 }
 variable "fluentbit_ec2_instance_type" {
     default = "t4g.micro"
