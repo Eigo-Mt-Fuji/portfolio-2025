@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  DesiredCapacity:
+    Type: Number
+    Default: ${desired_capacity}
+Resources:
+  ASGTerminateHook:
+    Type: AWS::AutoScaling::LifecycleHook
+    Properties:
+      AutoScalingGroupName: ${autoscalinggroup_name}
+      DefaultResult: ABANDON
+      HeartbeatTimeout: 3600
+      LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+      NotificationTargetARN: ${sns_target_arn}
+      RoleARN: ${sns_role_arn}
+    DependsOn: AutoScalingGroup
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: ${max_batch_size}
+        MinInstancesInService: ${min_instances_in_service}
+        MinSuccessfulInstancesPercent: 100
+        PauseTime: PT5M
+        SuspendProcesses:
+          - HealthCheck
+          - ReplaceUnhealthy
+          - AZRebalance
+          - AlarmNotification
+          - ScheduledActions
+        WaitOnResourceSignals: true
+    CreationPolicy:
+      AutoScalingCreationPolicy:
+        MinSuccessfulInstancesPercent: 100
+      ResourceSignal:
+        Count: 1
+        Timeout: PT5M
+    Properties:
+      AutoScalingGroupName: ${autoscalinggroup_name}
+      AvailabilityZones:
+        - ${availability_zone_1}
+        - ${availability_zone_2}
+      VPCZoneIdentifier:
+        - ${vpc_zone_identifier_1}
+        - ${vpc_zone_identifier_2}
+      Cooldown: 300
+      NewInstancesProtectedFromScaleIn: false
+      HealthCheckType: EC2
+      HealthCheckGracePeriod: 300
+      DesiredCapacity: !Ref DesiredCapacity
+      MaxSize: ${max_size}
+      MinSize: ${min_size}
+      TargetGroupARNs:
+        - ${target_group_arn}
+      MixedInstancesPolicy:
+        InstancesDistribution:
+          OnDemandBaseCapacity: !Ref DesiredCapacity
+          OnDemandPercentageAboveBaseCapacity: 100
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateName: ${launchtemplate_name}
+            Version: ${launchtemplate_varsion}
+          Overrides:
+            %{ for type in split(",", instance_types) }
+            - InstanceType: ${type}
+            %{ endfor }
+ 
