@@ -6,6 +6,8 @@
 
 - 読書目標(予算: 20万円)
   - セキュアで信頼性のあるシステム構築
+  - SLOサービスレベル目標
+  - Real World HTTP
 - 実践目標
   - AI x AWS SRE x Web Backend
 
