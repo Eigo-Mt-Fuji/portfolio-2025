@@ -8,6 +8,7 @@
   - セキュアで信頼性のあるシステム構築
   - SLOサービスレベル目標
   - Real World HTTP
+  - TBD...
 - 実践目標
   - AI x AWS SRE x Web Backend
 
