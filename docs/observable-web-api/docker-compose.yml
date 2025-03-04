@@ -11,8 +11,8 @@ services:
       - 8080:8080
     networks:
       - jaeger
-  jaeger:
-    
+
+  jaeger:    
     image: jaegertracing/all-in-one:latest
     platform: linux/x86_64
     ports:
@@ -26,5 +26,38 @@ services:
     networks:
       - jaeger
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres-data:/data
+
+  valkey:
+    image: valkey/valkey:8.1-alpine3.217
+    container_name: valkey
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey-data:/data
+volumes:
+  minio-data:
+  postgres-data:
+  valkey-data:
 networks:
   jaeger:
